@@ -6,7 +6,7 @@ git clone https://github.com/Pragyanstha/SummerCamp2021.git
 cd SummerCamp2021
 conda create -n "sumcamp"
 conda activate sumcamp
-conda install --file requirements.txt
+conda install -c conda-forge -c pytorch --file requirements.txt
 ```
 
 ## 方針
