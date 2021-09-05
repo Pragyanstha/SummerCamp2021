@@ -4,6 +4,7 @@
 ```
 git clone https://github.com/Pragyanstha/SummerCamp2021.git
 conda env create -f environment.yml
+conda activate sumcamp
 ```
 
 ## 方針
