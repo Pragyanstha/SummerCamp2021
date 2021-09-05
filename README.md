@@ -4,8 +4,9 @@
 ```
 git clone https://github.com/Pragyanstha/SummerCamp2021.git
 cd SummerCamp2021
-conda create --name sumcamp --file requirements.txt
+conda create -n "sumcamp"
 conda activate sumcamp
+conda install --file requirements.txt
 ```
 
 ## 方針
