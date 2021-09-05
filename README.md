@@ -3,7 +3,8 @@
 ## セットアップ
 ```
 git clone https://github.com/Pragyanstha/SummerCamp2021.git
-conda env create -f environment.yml
+cd SummerCamp2021
+conda create --name sumcamp --file requirements.txt
 conda activate sumcamp
 ```
 
