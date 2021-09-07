@@ -20,7 +20,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--world-size', default=-1, type=int,
                     help='number of nodes for distributed training')
-    parser.add_argument('--rank', default=-1, type=int,
+    parser.add_argument('--rank', default=0, type=int,
                         help='node rank for distributed training')
     parser.add_argument('--loca_rank', default=-1, type=int,
                         help='node rank for distributed training')
@@ -51,7 +51,7 @@ def parse_args():
         '-gen_bs',
         '--gen_batch_size',
         type=int,
-        default=64,
+        default=32,
         help='size of the batches')
     parser.add_argument(
         '-dis_bs',
