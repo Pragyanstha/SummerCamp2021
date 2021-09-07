@@ -26,8 +26,10 @@ class ImageDataset(object):
             train_dataset = Dt(root=args.data_path, train=True, transform=transform, download=True)
             val_dataset = Dt(root=args.data_path, train=False, transform=transform)
             
-            train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
-            val_sampler = torch.utils.data.distributed.DistributedSampler(val_dataset)
+            # train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
+            # val_sampler = torch.utils.data.distributed.DistributedSampler(val_dataset)
+            train_sampler = None
+            val_sampler = None
             self.train_sampler = train_sampler
             self.train = torch.utils.data.DataLoader(
                 train_dataset,

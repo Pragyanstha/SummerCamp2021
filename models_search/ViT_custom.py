@@ -385,9 +385,15 @@ class Discriminator(nn.Module):
             x = DiffAugment(x, self.args.diff_aug, True)
         B = x.shape[0]
         x = self.patch_embed(x).flatten(2).permute(0,2,1)
+        print(x.shape)# [32, 4, 64]
 
-        cls_tokens = self.cls_token.expand(B, -1, -1)  # stole cls_tokens impl from Phil Wang, thanks
-        x = torch.cat((cls_tokens, x), dim=1)
+        cls_tokens = self.cls_token.expand(B, -1, -1)  # stole cls_tokens impl from Phil Wang, thanks # [32, 1, 64]
+        x = torch.cat((cls_tokens, x), dim=1) 
+        
+        print((torch.cat((cls_tokens, x), dim=1)).shape) # [32, 6, 64]
+        print(x.shape) # [32, 5, 64]
+
+
         x = x + self.pos_embed
         x = self.pos_drop(x)
         for blk in self.blocks:

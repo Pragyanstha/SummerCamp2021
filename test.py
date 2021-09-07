@@ -13,7 +13,7 @@ import torch.nn as nn
 from imageio import imsave
 from torchvision.utils import make_grid, save_image
 from tqdm import tqdm
-import cv2
+
 
 from utils.fid_score import calculate_fid_given_paths
 # from utils.torch_fid_score import get_fid
@@ -31,7 +31,7 @@ from utils.fid_score import create_inception_graph, check_or_download_inception
 import torch
 import os
 import numpy as np
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 from utils.inception_score import get_inception_score
 
 torch.backends.cudnn.enabled = True

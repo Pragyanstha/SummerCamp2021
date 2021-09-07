@@ -15,7 +15,7 @@ import torch.nn as nn
 from imageio import imsave
 from utils.utils import make_grid, save_image
 from tqdm import tqdm
-import cv2
+
 
 # from utils.fid_score import calculate_fid_given_paths
 from utils.torch_fid_score import get_fid

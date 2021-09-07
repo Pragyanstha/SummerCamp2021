@@ -57,7 +57,7 @@ def parse_args():
         '-dis_bs',
         '--dis_batch_size',
         type=int,
-        default=64,
+        default=32,
         help='size of the batches')
     parser.add_argument(
         '--g_lr',
@@ -96,7 +96,7 @@ def parse_args():
     parser.add_argument(
         '--num_workers',
         type=int,
-        default=8,
+        default=3,
         help='number of cpu threads to use during batch generation')
     parser.add_argument(
         '--latent_dim',
