@@ -17,7 +17,7 @@ import torch.utils.data.distributed
 import os
 import numpy as np
 import torch.nn as nn
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 from copy import deepcopy
 from adamw import AdamW
@@ -106,9 +106,14 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # import network
     
-    
+    gen_net = eval('models_search.'+args.gen_model+'.Generator')(args=args)
+    dis_net = eval('models_search.'+args.dis_model+'.Discriminator')(args=args)
+
+    gen_net.apply(weights_init)
+    dis_net.apply(weights_init) 
     if not torch.cuda.is_available():
         print('using CPU, this will be slow')
+
     elif args.distributed:
         # For multiprocessing distributed, DistributedDataParallel constructor
         # should always set the single device scope, otherwise,
@@ -186,7 +191,8 @@ def main_worker(gpu, ngpus_per_node, args):
         args.max_epoch = np.ceil(args.max_iter * args.n_critic / len(train_loader))
 
     # initial
-    fixed_z = torch.cuda.FloatTensor(np.random.normal(0, 1, (100, args.latent_dim)))
+    #fixed_z = torch.cuda.FloatTensor(np.random.normal(0, 1, (100, args.latent_dim)))
+    fixed_z = torch.FloatTensor(np.random.normal(0, 1, (100, args.latent_dim)))
     avg_gen_net = deepcopy(gen_net).cpu()
     gen_avg_param = copy_params(avg_gen_net)
     del avg_gen_net
@@ -243,7 +249,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # train loop
     for epoch in range(int(start_epoch), int(args.max_epoch)):
-        train_sampler.set_epoch(epoch)
+    #    train_sampler.set_epoch(epoch)
         lr_schedulers = (gen_scheduler, dis_scheduler) if args.lr_decay else None
         cur_stage = cur_stages(epoch, args)
         print("cur_stage " + str(cur_stage)) if args.rank==0 else 0
