@@ -2,9 +2,6 @@ imageio
 scipy
 six
 numpy
-pytorch 
-torchvision 
-torchaudio 
-cpuonly
 tqdm
 requests
+tensorboard

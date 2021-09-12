@@ -5,7 +5,12 @@ git clone https://github.com/Pragyanstha/SummerCamp2021.git
 cd SummerCamp2021
 conda create -n "sumcamp"
 conda activate sumcamp
-conda install -c conda-forge -c pytorch --file requirements.txt
+```
+Pytorchは各自自分の環境に合わせてインストールしてね！  
+（condaを選択して)  
+https://pytorch.org/get-started/locally/
+```
+conda install -c conda-forge --file requirements.txt
 ```
 
 ## 方針
