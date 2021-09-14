@@ -108,6 +108,7 @@ def main_worker(gpu, ngpus_per_node, args):
     
     gen_net = eval('models_search.'+args.gen_model+'.Generator')(args=args)
     dis_net = eval('models_search.'+args.dis_model+'.Discriminator')(args=args)
+    
     if not torch.cuda.is_available():
         print('using CPU, this will be slow')
     elif args.distributed:
@@ -173,15 +174,15 @@ def main_worker(gpu, ngpus_per_node, args):
     elif args.fid_stat is not None:
         fid_stat = args.fid_stat
     else:
-        raise NotImplementedError(f'no fid stat for {args.dataset.lower()}')
-    assert os.path.exists(fid_stat)
+        ## Asita henkou dayo !!
+       fid_stat = 'fid_stat/fid_stats_cifar10_train.npz'
 
 
     # epoch number for dis_net
     args.max_epoch = args.max_epoch * args.n_critic
     dataset = datasets.ImageDataset(args, cur_img_size=8)
     train_loader = dataset.train
-    train_sampler = dataset.train_sampler
+
     print(len(train_loader))
     if args.max_iter:
         args.max_epoch = np.ceil(args.max_iter * args.n_critic / len(train_loader))
@@ -244,8 +245,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # train loop
     for epoch in range(int(start_epoch), int(args.max_epoch)):
-        if args.distributed:
-            train_sampler.set_epoch(epoch)
+
             
         lr_schedulers = (gen_scheduler, dis_scheduler) if args.lr_decay else None
         cur_stage = cur_stages(epoch, args)

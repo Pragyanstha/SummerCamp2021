@@ -19,7 +19,7 @@ os.system(f"python train_derived.py \
 --dist-backend 'nccl' \
 --world-size 1 \
 --rank {args.rank} \
---dataset cifar10 \
+--dataset isao \
 --bottom_width 8 \
 --img_size 32 \
 --max_iter 500000 \
@@ -54,4 +54,4 @@ os.system(f"python train_derived.py \
 --ema_warmup 0.1 \
 --ema 0.9999 \
 --diff_aug translation,cutout,color \
---exp_name cifar_train")
+--exp_name isao_train")

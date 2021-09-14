@@ -8,6 +8,7 @@ import torch
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset
+import isao
 
 class ImageDataset(object):
     def __init__(self, args, cur_img_size=None, bs=None):
@@ -75,3 +76,9 @@ class ImageDataset(object):
                 num_workers=args.num_workers, pin_memory=True, sampler=val_sampler)
 
             self.test = self.valid
+
+        elif args.dataset.lower() == 'isao':
+                train_dataset = isao.Isao('./Input_Images', use_label=False,  resize=32)
+                train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size = bs)
+                self.train = train_dataloader
+

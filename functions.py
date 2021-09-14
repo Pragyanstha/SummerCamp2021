@@ -77,10 +77,10 @@ def train(args, gen_net: nn.Module, dis_net: nn.Module, gen_optimizer, dis_optim
     
     dis_optimizer.zero_grad()
     gen_optimizer.zero_grad()
-    for iter_idx, (imgs, _) in enumerate(tqdm(train_loader)):
+    for iter_idx, batch in enumerate(tqdm(train_loader)):
         global_steps = writer_dict['train_global_steps']
         
-
+        imgs = batch['img']
         # Adversarial ground truths
         real_imgs = imgs.type(torch.cuda.FloatTensor).cuda(args.gpu, non_blocking=True)
 
