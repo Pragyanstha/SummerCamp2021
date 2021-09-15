@@ -260,20 +260,20 @@ def main_worker(gpu, ngpus_per_node, args):
             save_samples(args, fixed_z, fid_stat, epoch, gen_net, writer_dict)
             load_params(gen_net, backup_param, args)
         
-        if epoch and epoch % args.val_freq == 0 or epoch == int(args.max_epoch)-1:
-            backup_param = copy_params(gen_net)
-            load_params(gen_net, gen_avg_param, args, mode="cpu")
-            inception_score, fid_score = validate(args, fixed_z, fid_stat, epoch, gen_net, writer_dict)
-            if args.rank==0:
-                logger.info(f'Inception score: {inception_score}, FID score: {fid_score} || @ epoch {epoch}.')
-            load_params(gen_net, backup_param, args)
-            if fid_score < best_fid:
-                best_fid = fid_score
-                is_best = True
-            else:
-                is_best = False
-        else:
-            is_best = False
+        # if epoch and epoch % args.val_freq == 0 or epoch == int(args.max_epoch)-1:
+        #     backup_param = copy_params(gen_net)
+        #     load_params(gen_net, gen_avg_param, args, mode="cpu")
+        #     inception_score, fid_score = validate(args, fixed_z, fid_stat, epoch, gen_net, writer_dict)
+        #     if args.rank==0:
+        #         logger.info(f'Inception score: {inception_score}, FID score: {fid_score} || @ epoch {epoch}.')
+        #     load_params(gen_net, backup_param, args)
+        #     if fid_score < best_fid:
+        #         best_fid = fid_score
+        #         is_best = True
+        #     else:
+        #         is_best = False
+        # else:
+        #     is_best = False
 
         avg_gen_net = deepcopy(gen_net)
         load_params(avg_gen_net, gen_avg_param, args)

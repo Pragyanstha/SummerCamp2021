@@ -15,6 +15,7 @@ args = parse_args()
 os.system(f"python train_derived.py \
 -gen_bs 6 \
 -dis_bs 6 \
+--load_path logs/isao_train_2021_09_15_19_35_40/Model/checkpoint \
 --dist-url 'tcp://localhost:14256' \
 --dist-backend 'nccl' \
 --world-size 1 \
