@@ -78,7 +78,7 @@ class ImageDataset(object):
             self.test = self.valid
 
         elif args.dataset.lower() == 'isao':
-                train_dataset = isao.Isao('./Input_Images', use_label=False,  resize=32)
+                train_dataset = isao.Isao('./data/preprocessed', use_label=False,  resize=(64,64))
                 train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size = bs)
                 self.train = train_dataloader
 

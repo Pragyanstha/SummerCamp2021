@@ -18,7 +18,10 @@ class Isao(Dataset):
                 [transforms.Resize(resize),
                 transforms.ToTensor()]
             ) 
-
+        else:
+            self.transform = transforms.Compose(
+                [transforms.ToTensor()]
+            )
     def __len__(self):
         return len(self.files)
 
@@ -29,7 +32,7 @@ class Isao(Dataset):
         label = self.get_label(filepath)
         label_idx = self.labels.index(label)
         label_one_hot = self.label_map[label_idx]
-        
+
         sample = {'img': self.transform(img), 'label_name': [label], 'label_one_hot': label_one_hot}
         return sample
 
@@ -50,6 +53,6 @@ class Isao(Dataset):
                 label.append('-'.join(folder.split('-')[1:]))
             return label
         else:
-            folder_name = files.split('/')[2]
+            folder_name = files.split('/')[3]
             label = '-'.join(folder_name.split('-')[1:])
             return label
