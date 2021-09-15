@@ -13,13 +13,18 @@ https://pytorch.org/get-started/locally/
 conda install -c conda-forge --file requirements.txt
 ```
 
+前処理済みのデータは dataフォルダの中に入れる
+
 ## 方針
 TransGAN[https://arxiv.org/abs/2102.07074] をつかう
 ### 動作確認
-CIFAR10で学習  
+データセットが、data/preprocessedにあるとすると、
 ```
-python exps/cifar_train.py
+python train.py -c config_v1
 ```
+で動くはず。
+generated_imagesフォルダに生成画像が保存される。
+config_v1の中のdata_dirを必要に応じて変えてね。
 ### Tensorboardで学習を確認（別のターミナルで実行してね）
 SummerCamp2021内にいることを確認して
 ```

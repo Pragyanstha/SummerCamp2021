@@ -53,6 +53,6 @@ class Isao(Dataset):
                 label.append('-'.join(folder.split('-')[1:]))
             return label
         else:
-            folder_name = files.split('/')[3]
+            folder_name = files.split('/')[2]
             label = '-'.join(folder_name.split('-')[1:])
             return label
