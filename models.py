@@ -42,6 +42,7 @@ def window_partition(x, window_size):
     x = x.view(B, H // window_size, window_size, W // window_size, window_size, C)
     windows = x.permute(0, 1, 3, 2, 4, 5).contiguous().view(-1, window_size, window_size, C)
     return windows
+
 def window_reverse(windows, window_size, H, W):
     """
     Args:
@@ -185,7 +186,7 @@ class TransformerEncoder(nn.Module):
 
 class Generator(nn.Module):
     """docstring for Generator"""
-    def __init__(self, latent_dim=1024, depth1=5, depth2=4, depth3=3, depth4=2, initial_size=8, dim=384, heads=4, mlp_ratio=4, drop_rate=0., window_size = 16):#,device=device):
+    def __init__(self, latent_dim=1024, depth1=5, depth2=4, depth3=3, depth4=2, depth5=1, initial_size=8, dim=384, heads=4, mlp_ratio=4, drop_rate=0., window_size = 16):#,device=device):
         super(Generator, self).__init__()
 
         #self.device = device
@@ -201,16 +202,16 @@ class Generator(nn.Module):
         self.window_size = window_size
         # Noise is 1024 dims
         self.mlp = nn.Linear(latent_dim, (self.initial_size ** 2) * self.dim)
-
+        
         self.positional_embedding_1 = nn.Parameter(torch.zeros(1, (self.initial_size**2), self.dim))
         self.positional_embedding_2 = nn.Parameter(torch.zeros(1, (self.initial_size*2)**2, self.dim//4))
         self.positional_embedding_3 = nn.Parameter(torch.zeros(1, (self.initial_size*4)**2, self.dim//16))
         self.positional_embedding_4 = nn.Parameter(torch.zeros(1, (self.initial_size*8)**2, self.dim//64))
         self.TransformerEncoder_encoder1 = TransformerEncoder(depth=self.depth1, dim=self.dim,heads=self.heads, mlp_ratio=self.mlp_ratio, drop_rate=self.droprate_rate, window_size=0)
         self.TransformerEncoder_encoder2 = TransformerEncoder(depth=self.depth2, dim=self.dim//4, heads=self.heads, mlp_ratio=self.mlp_ratio, drop_rate=self.droprate_rate, window_size=0)
-        self.TransformerEncoder_encoder3 = TransformerEncoder(depth=self.depth3, dim=self.dim//16, heads=self.heads, mlp_ratio=self.mlp_ratio, drop_rate=self.droprate_rate, window_size=window_size)
+        self.TransformerEncoder_encoder3 = TransformerEncoder(depth=self.depth3, dim=self.dim//16, heads=self.heads, mlp_ratio=self.mlp_ratio, drop_rate=self.droprate_rate, window_size=0)
         self.TransformerEncoder_encoder4 = TransformerEncoder(depth=self.depth4, dim=self.dim//64, heads=self.heads, mlp_ratio=self.mlp_ratio, drop_rate=self.droprate_rate, window_size=window_size)
-
+               
         self.linear = nn.Sequential(nn.Conv2d(self.dim//64, 3, 1, 1, 0))
 
     def forward(self, noise):
@@ -227,14 +228,7 @@ class Generator(nn.Module):
 
         x, H, W = UpSampling(x, H, W)
         x = x + self.positional_embedding_3
-        B, _, C = x.size()
-        x = x.view(B, H, W, C)
-        x = window_partition(x, self.window_size)
-        x = x.view(-1, self.window_size*self.window_size, C)
         x = self.TransformerEncoder_encoder3(x)
-        x = x.view(-1, self.window_size, self.window_size, C)
-        x = window_reverse(x, self.window_size, H, W).view(B,H*W,C)
-
 
         x,H,W = UpSampling(x,H,W)
         x = x + self.positional_embedding_4

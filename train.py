@@ -16,18 +16,10 @@ from tqdm import tqdm
 from utils import *
 from models import *
 
-import torch.distributed as dist
-import torch.multiprocessing as mp
 from isao import Isao
 from config import parse
 
-if torch.cuda.is_available():
-    dev = "cuda:0"
-else:
-    dev = "cpu"
-
-device = torch.device(dev)
-print("Device:",device)
+device = torch.device('cuda:0')
 
 
 def compute_gradient_penalty(D, real_samples, fake_samples, phi):
@@ -133,31 +125,31 @@ def train(noise,generator, discriminator, optim_gen, optim_dis,
 
 if __name__ == '__main__':
     args = parse()
+    device = torch.device(f'cuda:{args.gpu_id}')
     os.makedirs(f'checkpoint/{args.expname}', exist_ok=True)
     os.makedirs(f'generated_images/{args.expname}', exist_ok=True)
-
-    # Initialize models
+ # Initialize models
     generator= Generator(depth1=5, depth2=4, depth3=2, 
                     initial_size=args.initial_size, latent_dim=args.latent_dim, dim=args.dim, heads=4, mlp_ratio=4, drop_rate=0.5)#,device = device)
+    
     discriminator = Discriminator(diff_aug = args.diff_aug, image_size=args.image_size, patch_size=args.patch_size, input_channel=3, num_classes=1,                    dim=args.dim, depth=7, heads=4, mlp_ratio=4,
                     drop_rate=0.)
-    
+
+    discriminator.to(device)
+    generator.to(device)
+
     if args.checkpoint != None and os.path.isfile(f'checkpoint/{args.expname}/{args.checkpoint}'):
         print(f'Loaded {args.checkpoint}')
         checkpoint = torch.load(f'checkpoint/{args.expname}/{args.checkpoint}')
         generator.load_state_dict(checkpoint['generator_state_dict'])
         discriminator.load_state_dict(checkpoint['discriminator_state_dict'])
 
-    generator.to(device)
-    discriminator.to(device)
-
     generator.apply(inits_weight)
     discriminator.apply(inits_weight)
 
     # Initialize datasets
     train_set = Isao(args.data_dir, use_label=False, resize=(64,64))
-    train_loader = torch.utils.data.DataLoader(dataset=train_set, batch_size=args.train_batch_size, 
-        sampler=torch.utils.data.RandomSampler(train_set, replacement=True, num_samples = 20000))
+    train_loader = torch.utils.data.DataLoader(dataset=train_set, batch_size=args.train_batch_size)
     
     # Initialize Optimizer
     if args.optim == 'Adam':
@@ -193,6 +185,9 @@ if __name__ == '__main__':
     train_loader, args)
 
     print("Hurray! finished all epochs.")
+
+
+   
         
 
 
