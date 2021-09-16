@@ -41,6 +41,7 @@ def inits_weight(m):
                 nn.init.xavier_uniform(m.weight.data, 1.)
 
 
+
 def noise(imgs, latent_dim):
         return torch.FloatTensor(np.random.normal(0, 1, (imgs.shape[0], latent_dim)))
 

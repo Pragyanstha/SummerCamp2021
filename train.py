@@ -129,11 +129,13 @@ if __name__ == '__main__':
     os.makedirs(f'checkpoint/{args.expname}', exist_ok=True)
     os.makedirs(f'generated_images/{args.expname}', exist_ok=True)
  # Initialize models
-    generator= Generator(depth1=5, depth2=4, depth3=2, 
-                    initial_size=args.initial_size, latent_dim=args.latent_dim, dim=args.dim, heads=4, mlp_ratio=4, drop_rate=0.5)#,device = device)
+    # generator= Generator(depth1=5, depth2=4, depth3=2, 
+    #                 initial_size=args.initial_size, latent_dim=args.latent_dim, dim=args.dim, heads=4, mlp_ratio=4, drop_rate=0.5)#,device = device)
     
-    discriminator = Discriminator(diff_aug = args.diff_aug, image_size=args.image_size, patch_size=args.patch_size, input_channel=3, num_classes=1,                    dim=args.dim, depth=7, heads=4, mlp_ratio=4,
-                    drop_rate=0.)
+    # discriminator = Discriminator(diff_aug = args.diff_aug, image_size=args.image_size, patch_size=args.patch_size, input_channel=3, num_classes=1,                    dim=args.dim, depth=7, heads=4, mlp_ratio=4,
+    #                 drop_rate=0.)
+    generator = Generator(initial_size = args.initial_size, latent_dim = args.latent_dim, dim = args.dim).cuda()#,device = device))
+    discriminator = Discriminator(diff_aug=args.diff_aug, patch_size=args.patch_size, dim=args.dim).cuda()
 
     discriminator.to(device)
     generator.to(device)
