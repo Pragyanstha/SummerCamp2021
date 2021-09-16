@@ -2,6 +2,9 @@ logs/
 src/
 data/
 Input_Images/
+preprocessed/
+save_images/
+runs/
 
 
 # Byte-compiled / optimized / DLL files

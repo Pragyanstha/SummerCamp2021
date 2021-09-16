@@ -11,8 +11,9 @@ class Isao(Dataset):
         self.use_label = use_label
         self.files = glob.glob(data_dir + '/**/*.jpg', recursive=True)
         self.files = [f.replace('\\n', '/n') for f in self.files]
-        self.labels = self.get_label(self.files)
-        self.label_map = np.eye(len(self.labels))
+        if use_label:
+            self.labels = self.get_label(self.files)
+            self.label_map = np.eye(len(self.labels))
         if resize != None:
             self.transform = transforms.Compose(
                 [transforms.Resize(resize),
@@ -29,11 +30,15 @@ class Isao(Dataset):
     def __getitem__(self, idx):
         filepath = self.files[idx]
         img = Image.open(filepath)
-        label = self.get_label(filepath)
-        label_idx = self.labels.index(label)
-        label_one_hot = self.label_map[label_idx]
+        if self.use_label:
+            label = self.get_label(filepath)
+            label_idx = self.labels.index(label)
+            label_one_hot = self.label_map[label_idx]
 
-        sample = {'img': self.transform(img), 'label_name': [label], 'label_one_hot': label_one_hot}
+            sample = {'img': self.transform(img), 'label_name': [label], 'label_one_hot': label_one_hot}
+        else:
+            sample = {'img': self.transform(img) }
+
         return sample
 
 
@@ -53,6 +58,6 @@ class Isao(Dataset):
                 label.append('-'.join(folder.split('-')[1:]))
             return label
         else:
-            folder_name = files.split('/')[3]
+            folder_name = files.split('/')[2]
             label = '-'.join(folder_name.split('-')[1:])
             return label
