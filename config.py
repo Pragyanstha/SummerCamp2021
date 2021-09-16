@@ -3,6 +3,7 @@ import configargparse
 def parse(args = None):
     parser = configargparse.ArgParser()
     parser.add('-c', '--my-config', required=True, is_config_file=True, help='config file path')
+    parser.add('--distributed', action='store_true')
     parser.add('--image_size', type=int, default= 32 , help='Size of image for discriminator input.')
     parser.add('--data_dir', type=str, default= 'data/preprocessed' , help='Path to datatset')
     parser.add('--expname', type=str,default= 'kaori' , help='Name of the experiment')
