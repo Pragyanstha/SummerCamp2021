@@ -112,8 +112,9 @@ def train(noise,generator, discriminator, optim_gen, optim_dis,
                 global_steps += 1
 
                 if gen_step and index % 100 == 0:
-                    sample_imgs = generated_imgs[:25]
+                    sample_imgs = generated_imgs[:25].detach().cpu()
                     save_image(sample_imgs, f'generated_images/{args.expname}/img_{epoch}_{index % len(train_loader)}.jpg', nrow=5, normalize=True, scale_each=True)            
+                    sample_imgs = (sample_imgs - sample_imgs.min())/(sample_imgs.max() - sample_imgs.min())
                     writer.add_images('Generated Samples', sample_imgs, global_steps)
                     # tqdm.write("[Epoch %d] [Batch %d/%d] [D loss: %f] [G loss: %f]" %
                     #     (epoch+1, index % len(train_loader), len(train_loader), loss_dis.item(), gener_loss.item()))
