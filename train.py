@@ -63,7 +63,7 @@ def train(noise,generator, discriminator, optim_gen, optim_dis,
 
                 optim_dis.zero_grad()
                 real_valid=discriminator(real_imgs)
-                fake_imgs = generator(noise).detach()
+                fake_imgs = generator(noise)
 
                 fake_valid = discriminator(fake_imgs)
 
@@ -120,7 +120,7 @@ def train(noise,generator, discriminator, optim_gen, optim_dis,
             checkpoint = {'epoch':epoch }
             checkpoint['generator_state_dict'] = generator.state_dict()
             checkpoint['discriminator_state_dict'] = discriminator.state_dict()
-            save_checkpoint(checkpoint, output_dir='checkpoint', filename=f'epoch_{epoch}')
+            save_checkpoint(checkpoint, output_dir=f'checkpoint/{args.expname}', filename=f'epoch_{epoch}')
 
 
 if __name__ == '__main__':

@@ -197,18 +197,25 @@ class DCGenerator(nn.Module):
     def __init__(self, n_in):
         super(DCGenerator, self).__init__()
         self.main = nn.Sequential(
-            # state size. (ngf*2) x 16 x 16
+            # state size. (ngf*2) x 2 x 2
+            nn.ConvTranspose2d( n_in, n_in, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(n_in),
+            nn.ReLU(True),
+            # state size. (ngf) x 4 x 4
+            # nn.ConvTranspose2d( n_in//2, 3, 4, 2, 1, bias=False),
+            # nn.Tanh()
+            nn.ConvTranspose2d( n_in, n_in, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(n_in),
+            nn.ReLU(True),
+            # 8*8
             nn.ConvTranspose2d( n_in, n_in//2, 4, 2, 1, bias=False),
             nn.BatchNorm2d(n_in//2),
             nn.ReLU(True),
-            # state size. (ngf) x 32 x 32
-            nn.ConvTranspose2d( n_in//2, 3, 4, 2, 1, bias=False),
-            nn.Tanh()
         )
         self.apply(weights_init)
 
     def forward(self, x):
-        return self.main(x)
+        return self.main(x[..., None, None])
 
 class DCDiscriminator(nn.Module):
     def __init__(self, ndf):
@@ -230,7 +237,7 @@ class DCDiscriminator(nn.Module):
 
 class TransGenerator(nn.Module):
     """docstring for Generator"""
-    def __init__(self, latent_dim=1024, depth1=5, depth2=4, depth3 = 3, initial_size=8, dim=384, heads=4, mlp_ratio=4, drop_rate=0., window_size = 16):#,device=device):
+    def __init__(self, latent_dim=1024, depth1=5, depth2=4, depth3 = 3, depth4=2, initial_size=8, dim=384, heads=4, mlp_ratio=4, drop_rate=0., window_size = 16):#,device=device):
         super(TransGenerator, self).__init__()
 
         #self.device = device
@@ -239,6 +246,7 @@ class TransGenerator(nn.Module):
         self.depth1 = depth1
         self.depth2 = depth2
         self.depth3 = depth3
+        self.depth4 = depth4
         self.heads = heads
         self.mlp_ratio = mlp_ratio
         self.droprate_rate =drop_rate
@@ -249,30 +257,50 @@ class TransGenerator(nn.Module):
         self.positional_embedding_1 = nn.Parameter(torch.zeros(1, (self.initial_size**2), self.dim))
         self.positional_embedding_2 = nn.Parameter(torch.zeros(1, (self.initial_size*2)**2, self.dim//4))
         self.positional_embedding_3 = nn.Parameter(torch.zeros(1, (self.initial_size*4)**2, self.dim//16))
+        self.positional_embedding_4 = nn.Parameter(torch.zeros(1, (self.initial_size*8)**2, self.dim//64))
         self.TransformerEncoder_encoder1 = TransformerEncoder(depth=self.depth1, dim=self.dim,heads=self.heads, mlp_ratio=self.mlp_ratio, drop_rate=self.droprate_rate, window_size=0)
         self.TransformerEncoder_encoder2 = TransformerEncoder(depth=self.depth2, dim=self.dim//4, heads=self.heads, mlp_ratio=self.mlp_ratio, drop_rate=self.droprate_rate, window_size=0)
-        self.TransformerEncoder_encoder3 = TransformerEncoder(depth=self.depth3, dim=self.dim//16, heads=self.heads, mlp_ratio=self.mlp_ratio, drop_rate=self.droprate_rate, window_size=0)
+        self.TransformerEncoder_encoder3 = TransformerEncoder(depth=self.depth3, dim=self.dim//16, heads=self.heads, mlp_ratio=self.mlp_ratio, drop_rate=self.droprate_rate, window_size=16)
+        self.TransformerEncoder_encoder4 = TransformerEncoder(depth=self.depth4, dim=self.dim//64, heads=self.heads, mlp_ratio=self.mlp_ratio, drop_rate=self.droprate_rate, window_size=16)
         
-        self.linear = nn.Sequential(nn.Conv2d(self.dim//16, self.dim//16, 1, 1, 0))
+        self.linear = nn.Sequential(nn.Conv2d(self.dim//64, 3, 1, 1, 0))
 
-    def forward(self, noise):
+    def forward(self, x):
 
-        x = self.mlp(noise).view(-1, self.initial_size ** 2, self.dim)
-
-        x = x + self.positional_embedding_1
+        #x = self.mlp(noise).view(-1, self.initial_size ** 2, self.dim)
+        # 8*8
+        x = x.view(-1, self.dim,self.initial_size**2).permute(0, 2,1) + self.positional_embedding_1
         H, W = self.initial_size, self.initial_size
         x = self.TransformerEncoder_encoder1(x)
 
-
+        # 16*16
         x,H,W = UpSampling(x,H,W)
         x = x + self.positional_embedding_2
         x = self.TransformerEncoder_encoder2(x)
 
+        # 32*32
         x,H,W = UpSampling(x,H,W)
         x = x + self.positional_embedding_3
+        B, _, C = x.size()
+        x = x.view(B, H, W, C)
+        x = window_partition(x, self.window_size)
+        x = x.view(-1, self.window_size*self.window_size, C)
         x = self.TransformerEncoder_encoder3(x)
+        x = x.view(-1, self.window_size, self.window_size, C)
+        x = window_reverse(x, self.window_size, H, W).view(B,H*W,C)
 
-        x = self.linear(x.permute(0, 2, 1).reshape((-1, self.dim//16, H, W)))
+        # 64*64
+        x,H,W = UpSampling(x,H,W)
+        x = x + self.positional_embedding_4
+        B, _, C = x.size()
+        x = x.view(B, H, W, C)
+        x = window_partition(x, self.window_size)
+        x = x.view(-1, self.window_size*self.window_size, C)
+        x = self.TransformerEncoder_encoder4(x)
+        x = x.view(-1, self.window_size, self.window_size, C)
+        x = window_reverse(x, self.window_size, H, W).view(B,H*W,C)
+
+        x = self.linear(x.permute(0, 2, 1).reshape((-1, self.dim//64, H, W)))
 
         return x
 
@@ -330,15 +358,15 @@ class TransDiscriminator(nn.Module):
 class Generator(nn.Module):
     def __init__(self, initial_size = 4, latent_dim = 512, dim = 256):
         super().__init__()
+    
+        self.DCGenerator = DCGenerator(latent_dim)
         self.TransGenerator = TransGenerator(depth1=5, depth2=4, depth3=3,
                     initial_size=initial_size, latent_dim=latent_dim, dim=dim, heads=4, mlp_ratio=4, drop_rate=0.5)#,device = device)
-    
-        self.DCGenerator = DCGenerator(initial_size*4)
         
 
     def forward(self, x):
-        x = self.TransGenerator(x)
         x = self.DCGenerator(x)
+        x = self.TransGenerator(x)
 
         return x
 
