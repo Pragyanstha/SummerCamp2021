@@ -16,7 +16,8 @@ from tqdm import tqdm
 from utils import *
 from models import *
 
-import torchvision
+import torch.distributed as dist
+import torch.multiprocessing as mp
 from isao import Isao
 from config import parse
 
@@ -112,7 +113,7 @@ def train(noise,generator, discriminator, optim_gen, optim_dis,
                 global_steps += 1
 
                 if gen_step and index % 100 == 0:
-                    sample_imgs = generated_imgs[:25].detach().cpu()
+                    sample_imgs = generated_imgs[:32].detach().cpu()
                     save_image(sample_imgs, f'generated_images/{args.expname}/img_{epoch}_{index % len(train_loader)}.jpg', nrow=5, normalize=True, scale_each=True)            
                     sample_imgs = (sample_imgs - sample_imgs.min())/(sample_imgs.max() - sample_imgs.min())
                     writer.add_images('Generated Samples', sample_imgs, global_steps)
@@ -155,7 +156,8 @@ if __name__ == '__main__':
 
     # Initialize datasets
     train_set = Isao(args.data_dir, use_label=False, resize=(64,64))
-    train_loader = torch.utils.data.DataLoader(dataset=train_set, batch_size=args.train_batch_size, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(dataset=train_set, batch_size=args.train_batch_size, 
+        sampler=torch.utils.data.RandomSampler(train_set, replacement=True, num_samples = 20000))
     
     # Initialize Optimizer
     if args.optim == 'Adam':
